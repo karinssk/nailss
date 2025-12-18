@@ -4,6 +4,18 @@ import bcrypt from 'bcryptjs'
 const prisma = new PrismaClient()
 
 async function main() {
+  // Clean up legacy test data safely (child records first to satisfy FK constraints)
+  await prisma.appointment.deleteMany()
+  await prisma.auditLog.deleteMany()
+  await prisma.technician.deleteMany()
+  await prisma.user.deleteMany({
+    where: {
+      email: {
+        in: ['owner@example.com', 'admin@example.com', 'technician@example.com']
+      }
+    }
+  })
+
   // Create branches
   const branch1 = await prisma.branch.create({
     data: {
@@ -20,61 +32,48 @@ async function main() {
   })
 
   // Create owner user
-  const hashedPassword = await bcrypt.hash('password123', 10)
+  const ownerPassword = await bcrypt.hash('258369ss', 10)
   const owner = await prisma.user.upsert({
-    where: { email: 'owner@example.com' },
-    update: {},
+    where: { email: 'owner_pro@gmail.com' },
+    update: {
+      password: ownerPassword
+    },
     create: {
       name: 'Owner',
-      email: 'owner@example.com',
-      password: hashedPassword,
+      email: 'owner_pro@gmail.com',
+      password: ownerPassword,
       role: 'OWNER'
     }
   })
 
   // Create admin user
+  const adminPassword = await bcrypt.hash('258369@@', 10)
   const admin = await prisma.user.upsert({
-    where: { email: 'admin@example.com' },
-    update: { branchId: branch1.id },
+    where: { email: 'admin_pro@gmail.com' },
+    update: {
+      branchId: branch1.id,
+      password: adminPassword
+    },
     create: {
       name: 'Admin',
-      email: 'admin@example.com',
-      password: hashedPassword,
+      email: 'admin_pro@gmail.com',
+      password: adminPassword,
       role: 'ADMIN',
       branchId: branch1.id
     }
   })
 
-  // Create technician user (sample login)
-  const technicianUser = await prisma.user.upsert({
-    where: { email: 'technician@example.com' },
-    update: { branchId: branch1.id, role: 'TECHNICIAN' },
-    create: {
-      name: 'Technician',
-      email: 'technician@example.com',
-      password: hashedPassword,
-      role: 'TECHNICIAN',
-      branchId: branch1.id
-    }
-  })
-
-  // Create technicians (link first one to sample user)
-  await prisma.technician.upsert({
-    where: { userId: technicianUser.id },
-    update: { color: '#3b82f6' },
-    create: {
-      name: 'ช่างแอน',
-      branchId: branch1.id,
-      commissionType: 'PERCENTAGE',
-      commissionValue: 30,
-      active: true,
-      userId: technicianUser.id,
-      color: '#3b82f6'
-    }
-  })
-
+  // Create technicians (without test login accounts)
   await prisma.technician.createMany({
     data: [
+      {
+        name: 'ช่างแอน',
+        branchId: branch1.id,
+        commissionType: 'PERCENTAGE',
+        commissionValue: 30,
+        active: true,
+        color: '#3b82f6'
+      },
       {
         name: 'ช่างนิด',
         branchId: branch1.id,
@@ -93,9 +92,8 @@ async function main() {
   })
 
   console.log('✅ Seed data created successfully!')
-  console.log('Owner: owner@example.com / password123')
-  console.log('Admin: admin@example.com / password123')
-  console.log('Technician: technician@example.com / password123 (read-only)')
+  console.log('Owner: owner_pro@gmail.com / 258369ss')
+  console.log('Admin: admin_pro@gmail.com / 258369@@')
 }
 
 main()

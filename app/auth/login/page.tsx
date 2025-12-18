@@ -5,11 +5,10 @@ import { useState } from "react"
 import { useRouter } from "next/navigation"
 
 export default function LoginPage() {
-  const [email, setEmail] = useState("owner@example.com")
-  const [password, setPassword] = useState("password123")
+  const [email, setEmail] = useState("owner_pro@gmail.com")
+  const [password, setPassword] = useState("258369ss")
   const [error, setError] = useState("")
   const router = useRouter()
-  const isDev = process.env.NODE_ENV !== "production"
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -34,9 +33,6 @@ export default function LoginPage() {
         <div>
           <h2 className="text-center text-3xl font-bold">เข้าสู่ระบบ</h2>
           <p className="mt-2 text-center text-gray-600">ระบบจัดการคิวช่างทำเล็บ</p>
-          <div className="mt-2 bg-amber-50 border border-amber-200 text-amber-800 text-xs text-center px-3 py-2 rounded">
-            ทดสอบ: owner@example.com, admin@example.com, technician@example.com (รหัสผ่าน: password123)
-          </div>
         </div>
 
         <form className="mt-8 space-y-6" onSubmit={handleSubmit}>
@@ -106,14 +102,6 @@ export default function LoginPage() {
             เข้าสู่ระบบด้วย Google
           </button>
 
-          {isDev && (
-            <div className="mt-4 text-sm bg-amber-50 border border-amber-200 text-amber-800 p-3 rounded">
-              Dev mode test accounts:<br />
-              <strong>owner@example.com / password123</strong><br />
-              <strong>admin@example.com / password123</strong><br />
-              <strong>technician@example.com / password123</strong>
-            </div>
-          )}
         </div>
       </div>
     </div>
