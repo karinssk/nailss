@@ -5,8 +5,8 @@ import { useState } from "react"
 import { useRouter } from "next/navigation"
 
 export default function LoginPage() {
-  const [email, setEmail] = useState("owner_pro@gmail.com")
-  const [password, setPassword] = useState("258369ss")
+  const [email, setEmail] = useState("")
+  const [password, setPassword] = useState("")
   const [error, setError] = useState("")
   const router = useRouter()
 
@@ -21,9 +21,9 @@ export default function LoginPage() {
     })
 
     if (result?.error) {
-      setError("อีเมลหรือรหัสผ่านไม่ถูกต้อง")
+      setError("อีเมลหรือรหัสผ่านไม่ถูกต้อง") 
     } else {
-      router.push("https://nail.fastforwardssl.com/calendar")
+      router.push("https://nailscheerful.com/calendar")
     }
   }
 
@@ -90,7 +90,7 @@ export default function LoginPage() {
 
           <button
             type="button"
-            onClick={() => signIn("google", { callbackUrl: "https://nail.fastforwardssl.com/calendar" })}
+            onClick={() => signIn("google", { callbackUrl: "https://nailscheerful.com/calendar" })}
             className="mt-4 w-full py-2 px-4 border border-gray-300 rounded-md bg-white hover:bg-gray-50 text-gray-700 flex items-center justify-center gap-2 transition-colors"
           >
             <svg className="w-5 h-5" viewBox="0 0 24 24">

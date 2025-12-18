@@ -46,11 +46,14 @@ export default function AppointmentModal({
     if (appointment) {
       const start = new Date(appointment.startAt)
       const end = new Date(appointment.endAt)
+      const fallbackTechId = technicians.find((t) => t.id === appointment.technicianId)
+        ? appointment.technicianId
+        : technicians[0]?.id || ""
 
       setFormData({
         customerName: appointment.customerName,
         customerPhone: appointment.customerPhone || "",
-        technicianId: appointment.technicianId,
+        technicianId: fallbackTechId,
         date: start.toISOString().split('T')[0],
         startTime: start.toTimeString().slice(0, 5),
         endTime: end.toTimeString().slice(0, 5),
@@ -61,11 +64,12 @@ export default function AppointmentModal({
       })
     } else {
       const dateStr = selectedDate.toISOString().split('T')[0]
+      const firstTechId = technicians[0]?.id || ""
       setFormData((prev) => ({ 
         ...prev, 
         date: dateStr,
         customerPhone: "",
-        technicianId: technicians.length > 0 ? technicians[0].id : ""
+        technicianId: firstTechId
       }))
     }
   }, [appointment, technicians, selectedDate])
@@ -302,15 +306,22 @@ export default function AppointmentModal({
               required
               value={formData.technicianId}
               onChange={(e) => setFormData({ ...formData, technicianId: e.target.value })}
-              disabled={readOnly}
+              disabled={readOnly || technicians.length === 0}
               className={readOnly ? "bg-muted" : ""}
             >
-              {technicians.map((tech) => (
-                <option key={tech.id} value={tech.id}>
-                  {tech.name}
-                </option>
-              ))}
+              {technicians.length === 0 ? (
+                <option value="">ไม่มีช่างในสาขานี้</option>
+              ) : (
+                technicians.map((tech) => (
+                  <option key={tech.id} value={tech.id}>
+                    {tech.name}
+                  </option>
+                ))
+              )}
             </Select>
+            {technicians.length === 0 && (
+              <p className="text-xs text-muted-foreground">เพิ่มช่างก่อนจึงจะเลือกได้</p>
+            )}
           </div>
 
           <div className="space-y-2">
