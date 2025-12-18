@@ -36,8 +36,11 @@ export async function POST(req: NextRequest) {
     const timestamp = Date.now()
     const filename = `${timestamp}.jpg`
     
-    // Ensure upload directory exists
-    const uploadDir = join(process.cwd(), "public", "uploads", "technicians")
+    // Ensure upload directory exists (handles both dev and standalone build cwd)
+    const projectRoot = existsSync(join(process.cwd(), "public"))
+      ? process.cwd()
+      : join(process.cwd(), "..")
+    const uploadDir = join(projectRoot, "public", "uploads", "technicians")
     if (!existsSync(uploadDir)) {
       await mkdir(uploadDir, { recursive: true })
     }
