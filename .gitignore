@@ -1,0 +1,41 @@
+# Dependencies
+node_modules
+.pnp
+.pnp.js
+
+# Next.js build output
+.next
+out
+.vercel
+.turbo
+
+# Compiled artifacts
+dist
+build
+*.tsbuildinfo
+
+# Environment files
+.env
+.env.*
+*.env
+
+# Logs and coverage
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+lerna-debug.log*
+*.log
+coverage
+*.lcov
+
+# Editor cruft
+.DS_Store
+.idea
+.vscode
+*.swp
+*.swo
+
+# Database files
+prisma/*.db
+prisma/*.db-journal

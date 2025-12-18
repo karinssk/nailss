@@ -1,0 +1,119 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id            String         @id @default(cuid())
+  name          String
+  email         String         @unique
+  password      String?
+  image         String?
+  role          Role           @default(TECHNICIAN)
+  branchId      String?
+  branch        Branch?        @relation(fields: [branchId], references: [id])
+  technician    Technician?
+  createdAt     DateTime       @default(now())
+  updatedAt     DateTime       @updatedAt
+  appointments  Appointment[]  @relation("CreatedBy")
+  auditLogs     AuditLog[]
+
+  @@index([branchId])
+}
+
+model Branch {
+  id            String         @id @default(cuid())
+  name          String
+  address       String?
+  createdAt     DateTime       @default(now())
+  updatedAt     DateTime       @updatedAt
+  technicians   Technician[]
+  appointments  Appointment[]
+  users         User[]
+}
+
+model Technician {
+  id              String         @id @default(cuid())
+  userId          String?        @unique
+  user            User?          @relation(fields: [userId], references: [id], onDelete: SetNull)
+  branchId        String
+  branch          Branch         @relation(fields: [branchId], references: [id], onDelete: Cascade)
+  name            String
+  color           String         @default("#3b82f6")
+  image           String?
+  commissionType  CommissionType @default(PERCENTAGE)
+  commissionValue Float
+  active          Boolean        @default(true)
+  createdAt       DateTime       @default(now())
+  updatedAt       DateTime       @updatedAt
+  appointments    Appointment[]
+
+  @@index([branchId])
+}
+
+model Setting {
+  key   String @id
+  value Json
+  updatedAt DateTime @updatedAt
+}
+
+model Appointment {
+  id               String            @id @default(cuid())
+  branchId         String
+  branch           Branch            @relation(fields: [branchId], references: [id], onDelete: Cascade)
+  technicianId     String
+  technician       Technician        @relation(fields: [technicianId], references: [id], onDelete: Cascade)
+  customerName     String
+  customerPhone    String?
+  startAt          DateTime
+  endAt            DateTime
+  price            Float
+  commissionAmount Float
+  status           AppointmentStatus @default(BOOKED)
+  notes            String?           @db.Text
+  createdBy        String
+  creator          User              @relation("CreatedBy", fields: [createdBy], references: [id])
+  createdAt        DateTime          @default(now())
+  updatedAt        DateTime          @updatedAt
+
+  @@index([branchId])
+  @@index([technicianId])
+  @@index([startAt])
+  @@index([status])
+}
+
+model AuditLog {
+  id        String   @id @default(cuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  action    String
+  entity    String
+  entityId  String
+  details   String?  @db.Text
+  createdAt DateTime @default(now())
+
+  @@index([userId])
+  @@index([entity, entityId])
+  @@index([createdAt])
+}
+
+enum Role {
+  OWNER
+  ADMIN
+  TECHNICIAN
+}
+
+enum CommissionType {
+  PERCENTAGE
+  FIXED
+}
+
+enum AppointmentStatus {
+  BOOKED
+  DONE
+  CANCELLED
+}
