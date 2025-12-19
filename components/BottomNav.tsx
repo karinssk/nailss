@@ -9,6 +9,8 @@ export default function BottomNav() {
   const pathname = usePathname()
   const router = useRouter()
 
+  if (pathname.startsWith("/auth")) return null
+
   const navItems = [
     {
       href: "/calendar",
