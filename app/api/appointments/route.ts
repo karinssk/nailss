@@ -59,6 +59,18 @@ export async function POST(req: NextRequest) {
   // Users can now book multiple appointments for the same technician at the same time
 
   try {
+    // Validate that the technician exists
+    const technicianExists = await prisma.technician.findUnique({
+      where: { id: technicianId }
+    })
+
+    if (!technicianExists) {
+      return NextResponse.json(
+        { error: "ไม่พบข้อมูลช่างที่เลือก กรุณาเลือกช่างใหม่" },
+        { status: 400 }
+      )
+    }
+
     // Verify the user exists before creating appointment
     let creatorId = session.user.id
     const userExists = await prisma.user.findUnique({

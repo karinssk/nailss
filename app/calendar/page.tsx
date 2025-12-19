@@ -568,6 +568,7 @@ export default function CalendarPage() {
         <WeekCalendar
           currentDate={currentDate}
           appointments={filteredAppointments}
+          technicians={technicians.filter(t => techFilter.includes(t.id))}
           statusColors={statusColors}
           onDateClick={handleDateClick}
           onAppointmentClick={handleAppointmentClick}

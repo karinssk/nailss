@@ -1,5 +1,6 @@
 "use client"
 
+import { useRef, useEffect } from "react"
 import { cn } from "@/lib/utils"
 
 interface DayCalendarProps {
@@ -21,7 +22,22 @@ export default function DayCalendar({
   onTechnicianClick,
   isOwner = false
 }: DayCalendarProps) {
-  const hours = Array.from({ length: 13 }, (_, i) => i + 9) // 9:00 - 21:00
+  const SLOT_HEIGHT = 80
+  const hours = Array.from({ length: 24 }, (_, i) => i) // 00:00 - 23:00
+
+  const scrollRefDesktop = useRef<HTMLDivElement>(null)
+  const scrollRefMobile = useRef<HTMLDivElement>(null)
+
+  // Auto-scroll to 8AM when component mounts or currentDate changes
+  useEffect(() => {
+    const scrollTop = 8 * SLOT_HEIGHT // 8AM position
+    if (scrollRefDesktop.current) {
+      scrollRefDesktop.current.scrollTop = scrollTop
+    }
+    if (scrollRefMobile.current) {
+      scrollRefMobile.current.scrollTop = scrollTop
+    }
+  }, [currentDate])
 
   const getAppointmentsForTech = (techId: string) => {
     return appointments.filter((apt) => {
@@ -78,21 +94,21 @@ export default function DayCalendar({
   const getAppointmentStyle = (appointment: any) => {
     const start = new Date(appointment.startAt)
     const end = new Date(appointment.endAt)
-    
+
     const startHour = start.getHours()
     const startMinute = start.getMinutes()
     const durationMs = end.getTime() - start.getTime()
     const durationHours = durationMs / (1000 * 60 * 60)
 
-    const top = ((startHour - 9) * 80) + (startMinute / 60 * 80)
-    const height = durationHours * 80
+    const top = (startHour * SLOT_HEIGHT) + (startMinute / 60 * SLOT_HEIGHT)
+    const height = durationHours * SLOT_HEIGHT
 
     const layout = layoutByAppointment[appointment.id] || { column: 0, total: 1 }
     const widthPercent = 100 / layout.total
     const leftPercent = layout.column * widthPercent
 
-    return { 
-      top: `${top}px`, 
+    return {
+      top: `${top}px`,
       height: `${Math.max(height, 40)}px`,
       width: `calc(${widthPercent}% - 4px)`,
       left: `${leftPercent}%`
@@ -103,9 +119,9 @@ export default function DayCalendar({
     const now = new Date()
     const hour = now.getHours()
     const minute = now.getMinutes()
-    
+
     if (hour < 9 || hour >= 22) return null
-    
+
     const top = ((hour - 9) * 80) + (minute / 60 * 80)
     return top
   }
@@ -124,7 +140,7 @@ export default function DayCalendar({
   return (
     <div className="flex-1 flex flex-col overflow-hidden bg-background">
       {/* Desktop View - Multi-column layout */}
-      <div className="hidden md:flex flex-1 overflow-auto">
+      <div ref={scrollRefDesktop} className="hidden md:flex flex-1 overflow-auto">
         <div className="flex relative min-h-full w-full">
           {/* Time Labels Column */}
           <div className="w-20 flex-shrink-0 border-r bg-card sticky left-0 z-20">
@@ -142,32 +158,32 @@ export default function DayCalendar({
           <div className="flex-1 flex">
             {technicians.map((tech) => {
               const techAppointments = getAppointmentsForTech(tech.id)
-              
+
               return (
                 <div
                   key={tech.id}
                   className="flex-1 min-w-[140px] border-r last:border-r-0 relative"
                 >
                   {/* Technician Header */}
-                  <div 
+                  <div
                     className={cn(
                       "sticky top-0 z-10 bg-card border-b h-16 flex items-center justify-center gap-2 px-2",
                       isOwner && onTechnicianClick && "cursor-pointer hover:bg-accent transition-colors"
                     )}
                     onClick={() => isOwner && onTechnicianClick?.(tech)}
                   >
-                    <div 
+                    <div
                       className="w-10 h-10 rounded-full flex items-center justify-center text-sm font-bold overflow-hidden border-2 flex-shrink-0"
-                      style={{ 
+                      style={{
                         borderColor: tech.color || "#3b82f6",
                         backgroundColor: (tech.color || "#3b82f6") + "20"
                       }}
                     >
-                        {tech.image ? (
-                          <img src={tech.image} alt={tech.name} className="w-full h-full object-cover" />
-                        ) : (
-                          <span>{tech.name.charAt(0)}</span>
-                        )}
+                      {tech.image ? (
+                        <img src={tech.image} alt={tech.name} className="w-full h-full object-cover" />
+                      ) : (
+                        <span>{tech.name.charAt(0)}</span>
+                      )}
                     </div>
                     <span className="text-sm font-semibold truncate">
                       {tech.name}
@@ -191,21 +207,21 @@ export default function DayCalendar({
                     {/* Appointments */}
                     {techAppointments.map((apt) => {
                       const style = getAppointmentStyle(apt)
-                      const statusColor = apt.status === "DONE" 
-                        ? "#22c55e" 
-                        : apt.status === "CANCELLED" 
-                        ? "#6b7280" 
-                        : tech.color || "#3b82f6"
-                      
+                      const statusColor = apt.status === "DONE"
+                        ? "#22c55e"
+                        : apt.status === "CANCELLED"
+                          ? "#6b7280"
+                          : tech.color || "#3b82f6"
+
                       return (
                         <div
                           key={apt.id}
-                        className="absolute rounded-lg p-2 cursor-pointer shadow-md hover:shadow-lg transition-all overflow-hidden border-l-4"
-                        style={{
-                          ...style,
-                          backgroundColor: statusColor + "E6",
-                          borderLeftColor: statusColor
-                        }}
+                          className="absolute rounded-lg p-2 cursor-pointer shadow-md hover:shadow-lg transition-all overflow-hidden border-l-4"
+                          style={{
+                            ...style,
+                            backgroundColor: statusColor + "E6",
+                            borderLeftColor: statusColor
+                          }}
                           onClick={(e) => {
                             e.stopPropagation()
                             onAppointmentClick(apt)
@@ -257,7 +273,7 @@ export default function DayCalendar({
       </div>
 
       {/* Mobile View - Single column scrollable */}
-      <div className="md:hidden flex-1 overflow-auto">
+      <div ref={scrollRefMobile} className="md:hidden flex-1 overflow-auto">
         <div className="flex relative min-h-full min-w-max">
           {/* Time Labels */}
           <div className="w-16 flex-shrink-0 border-r bg-card sticky left-0 z-20">
@@ -272,14 +288,14 @@ export default function DayCalendar({
           <div className="flex">
             {technicians.map((tech) => {
               const techAppointments = getAppointmentsForTech(tech.id)
-              
+
               return (
                 <div
                   key={tech.id}
                   className="w-32 border-r last:border-r-0 relative flex-shrink-0"
                 >
                   {/* Technician Header */}
-                  <div 
+                  <div
                     className={cn(
                       "sticky top-0 z-10 bg-card border-b p-2",
                       isOwner && onTechnicianClick && "cursor-pointer hover:bg-accent"
@@ -287,9 +303,9 @@ export default function DayCalendar({
                     onClick={() => isOwner && onTechnicianClick?.(tech)}
                   >
                     <div className="flex flex-col items-center gap-1">
-                      <div 
+                      <div
                         className="w-8 h-8 rounded-full flex items-center justify-center text-xs font-semibold overflow-hidden border-2"
-                        style={{ 
+                        style={{
                           borderColor: tech.color || "#3b82f6",
                           backgroundColor: (tech.color || "#3b82f6") + "20"
                         }}
@@ -328,11 +344,11 @@ export default function DayCalendar({
                         className="absolute left-1 right-1 rounded-lg p-2 cursor-pointer shadow-sm hover:shadow-md transition-all overflow-hidden text-white"
                         style={{
                           ...style,
-                          backgroundColor: apt.status === "DONE" 
-                            ? "#22c55e" 
-                            : apt.status === "CANCELLED" 
-                            ? "#6b7280" 
-                            : tech.color || "#3b82f6"
+                          backgroundColor: apt.status === "DONE"
+                            ? "#22c55e"
+                            : apt.status === "CANCELLED"
+                              ? "#6b7280"
+                              : tech.color || "#3b82f6"
                         }}
                         onClick={(e) => {
                           e.stopPropagation()

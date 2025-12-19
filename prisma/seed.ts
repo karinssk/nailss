@@ -79,14 +79,16 @@ async function main() {
         branchId: branch1.id,
         commissionType: 'PERCENTAGE',
         commissionValue: 35,
-        active: true
+        active: true,
+        color: '#ef4444'
       },
       {
         name: 'ช่างนก',
         branchId: branch2.id,
         commissionType: 'FIXED',
         commissionValue: 200,
-        active: true
+        active: true,
+        color: '#22c55e'
       }
     ]
   })

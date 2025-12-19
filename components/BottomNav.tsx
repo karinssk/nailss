@@ -2,14 +2,33 @@
 
 import Link from "next/link"
 import { usePathname, useRouter } from "next/navigation"
-import { Calendar, BarChart3, Settings, Plus } from "lucide-react"
+import { Calendar, BarChart3, Settings, Plus, User } from "lucide-react"
 import { cn } from "@/lib/utils"
+import { useSession } from "next-auth/react"
 
 export default function BottomNav() {
   const pathname = usePathname()
   const router = useRouter()
+  const { data: session } = useSession()
 
   if (pathname.startsWith("/auth")) return null
+
+  const userRole = session?.user?.role
+
+  // Determine the last nav item based on role
+  const lastNavItem = userRole === "OWNER"
+    ? {
+      href: "/settings",
+      label: "ตั้งค่า",
+      icon: Settings,
+      active: pathname === "/settings"
+    }
+    : {
+      href: "/profile",
+      label: "โปรไฟล์",
+      icon: User,
+      active: pathname === "/profile"
+    }
 
   const navItems = [
     {
@@ -30,12 +49,7 @@ export default function BottomNav() {
       icon: BarChart3,
       active: pathname === "/dashboard"
     },
-    {
-      href: "/settings",
-      label: "ตั้งค่า",
-      icon: Settings,
-      active: pathname === "/settings"
-    }
+    lastNavItem
   ]
 
   const handleAddClick = () => {
@@ -50,7 +64,7 @@ export default function BottomNav() {
 
   return (
     <nav className="md:hidden fixed bottom-0 left-0 right-0 bg-card border-t z-50 safe-area-bottom">
-      <div className="relative flex items-center justify-around h-16">
+      <div className="relative flex items-center justify-around h-16 max-w-md mx-auto">
         {/* Left items */}
         {(() => {
           const Icon0 = navItems[0].icon

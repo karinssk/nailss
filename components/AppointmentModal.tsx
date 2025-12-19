@@ -170,6 +170,16 @@ export default function AppointmentModal({
     e.preventDefault()
     setError("")
 
+    if (technicians.length === 0) {
+      setError("ไม่มีช่างในสาขานี้ กรุณาเพิ่มช่างก่อน")
+      return
+    }
+
+    if (!formData.technicianId) {
+      setError("กรุณาเลือกช่าง")
+      return
+    }
+
     if (!formData.date) {
       setError("กรุณาเลือกวันที่")
       return

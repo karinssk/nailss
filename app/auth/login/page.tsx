@@ -24,6 +24,7 @@ export default function LoginPage() {
       setError("อีเมลหรือรหัสผ่านไม่ถูกต้อง")
     } else {
       router.push("https://nailscheerful.com/calendar")
+
     }
   }
 
@@ -31,7 +32,7 @@ export default function LoginPage() {
     <div className="min-h-screen flex items-center justify-center relative overflow-hidden">
       {/* Gradient Background */}
       <div className="absolute inset-0 bg-gradient-to-br from-pink-50 via-rose-50 to-purple-50"></div>
-      
+
       {/* Decorative Elements */}
       <div className="absolute top-0 left-0 w-72 h-72 bg-pink-200 rounded-full mix-blend-multiply filter blur-3xl opacity-30 animate-blob"></div>
       <div className="absolute top-0 right-0 w-72 h-72 bg-purple-200 rounded-full mix-blend-multiply filter blur-3xl opacity-30 animate-blob animation-delay-2000"></div>
