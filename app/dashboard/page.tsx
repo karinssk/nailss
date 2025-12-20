@@ -1,13 +1,15 @@
 "use client"
 
 import { useEffect, useState } from "react"
+import { useSession } from "next-auth/react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Select } from "@/components/ui/select"
-import { Download } from "lucide-react"
+import { Download, ShieldX } from "lucide-react"
 
 export default function DashboardPage() {
+  const { data: session, status } = useSession()
   const [view, setView] = useState<"SUMMARY" | "DETAILS">("SUMMARY")
   const [startDate, setStartDate] = useState("")
   const [endDate, setEndDate] = useState("")
@@ -142,6 +144,38 @@ export default function DashboardPage() {
       default:
         return status
     }
+  }
+
+  // Check if session is loading
+  if (status === "loading") {
+    return (
+      <div className="min-h-screen bg-background flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto mb-4"></div>
+          <p className="text-muted-foreground">กำลังโหลด...</p>
+        </div>
+      </div>
+    )
+  }
+
+  // Check if user is OWNER - only OWNER can access dashboard
+  const userRole = session?.user?.role
+  const isOwner = userRole === "OWNER"
+
+  if (!isOwner) {
+    return (
+      <div className="min-h-screen bg-background flex items-center justify-center p-4">
+        <div className="text-center max-w-md">
+          <div className="bg-red-100 dark:bg-red-950/30 rounded-full w-16 h-16 flex items-center justify-center mx-auto mb-4">
+            <ShieldX className="h-8 w-8 text-red-600 dark:text-red-400" />
+          </div>
+          <h1 className="text-xl font-bold mb-2">ไม่มีสิทธิ์เข้าถึง</h1>
+          <p className="text-muted-foreground">
+            หน้ารายงานสรุปยอดนี้สามารถเข้าถึงได้เฉพาะเจ้าของ (Owner) เท่านั้น
+          </p>
+        </div>
+      </div>
+    )
   }
 
   return (
@@ -379,8 +413,8 @@ export default function DashboardPage() {
                         day: "2-digit",
                         hour: "2-digit",
                         minute: "2-digit"
-                    })}
-                  </div>
+                      })}
+                    </div>
                     <div>ลูกค้า: {apt.customerName}</div>
                     {apt.customerPhone && <div>โทร: {apt.customerPhone}</div>}
                     <div>ราคา: ฿{Number(apt.price || 0).toFixed(2)}</div>
