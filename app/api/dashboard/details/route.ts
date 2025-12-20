@@ -18,12 +18,19 @@ export async function GET(req: NextRequest) {
     ? statusParam.split(",").map((s) => s.trim().toUpperCase()).filter((s) => allowedStatuses.includes(s as any))
     : allowedStatuses
 
+  // Parse endDate and set to end of day to include all appointments on that date
+  let endDateObj: Date | undefined = undefined
+  if (endDate) {
+    endDateObj = new Date(endDate)
+    endDateObj.setHours(23, 59, 59, 999) // End of day
+  }
+
   const where: any = {
     status: { in: statuses.length ? statuses : allowedStatuses }
   }
 
   if (startDate) where.startAt = { ...(where.startAt || {}), gte: new Date(startDate) }
-  if (endDate) where.endAt = { ...(where.endAt || {}), lte: new Date(endDate) }
+  if (endDateObj) where.startAt = { ...(where.startAt || {}), lte: endDateObj }
 
   if (isTechnician) {
     if (!session.user.technicianId) {

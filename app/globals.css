@@ -76,3 +76,26 @@ body {
   color: hsl(var(--foreground));
   font-family: 'Google Sans', 'Roboto', Arial, sans-serif;
 }
+
+/* Safe area insets for iOS devices */
+.pb-safe {
+  padding-bottom: env(safe-area-inset-bottom);
+}
+
+/* Mobile modal full height styles */
+@media (max-width: 767px) {
+  .swal2-container {
+    z-index: 99999 !important;
+  }
+  
+  .swal2-popup {
+    font-size: 14px !important;
+  }
+}
+
+/* Toast positioning for safe area */
+.swal2-container.swal2-top-end {
+  padding-top: max(12px, env(safe-area-inset-top));
+  padding-right: max(12px, env(safe-area-inset-right));
+}
+

@@ -70,7 +70,7 @@ export default function CalendarPage() {
   const fetchBranches = async () => {
     const res = await fetch("/api/branches")
     const data = await res.json()
-    
+
     // For technicians, show all branches if they don't have a specific branch assigned
     // or if their branch doesn't exist in the data
     const visibleBranches = isTechnician && session?.user.branchId
@@ -78,7 +78,7 @@ export default function CalendarPage() {
       : data
 
     setBranches(visibleBranches.length > 0 ? visibleBranches : data)
-    
+
     if (visibleBranches.length > 0) {
       setSelectedBranch(visibleBranches[0].id)
     } else if (data.length > 0) {
@@ -289,8 +289,8 @@ export default function CalendarPage() {
               const day = i - firstDay + 1
               const isCurrentMonth = day > 0 && day <= daysInMonth
               const date = new Date(currentDate.getFullYear(), currentDate.getMonth(), day)
-              const isToday = isCurrentMonth && 
-                day === new Date().getDate() && 
+              const isToday = isCurrentMonth &&
+                day === new Date().getDate() &&
                 currentDate.getMonth() === new Date().getMonth() &&
                 currentDate.getFullYear() === new Date().getFullYear()
               const isSelected = isCurrentMonth &&
@@ -345,7 +345,7 @@ export default function CalendarPage() {
             >
               <div
                 className="w-8 h-8 rounded-full flex items-center justify-center text-xs font-semibold overflow-hidden border"
-                style={{ 
+                style={{
                   borderColor: tech.color || "#3b82f6",
                   backgroundColor: (tech.color || "#3b82f6") + "20"
                 }}
@@ -386,9 +386,9 @@ export default function CalendarPage() {
         {/* Header */}
         <div className="flex items-center justify-between px-3 md:px-6 py-2 md:py-3 border-b">
           <div className="flex items-center gap-2 md:gap-4">
-            <Button 
-              variant="ghost" 
-              size="icon" 
+            <Button
+              variant="ghost"
+              size="icon"
               className="lg:hidden"
               onClick={() => setShowMobileSidebar(true)}
             >
@@ -402,21 +402,21 @@ export default function CalendarPage() {
 
           <div className="flex items-center gap-2 md:gap-4">
             <div className="relative">
-              <Button 
-                onClick={() => setShowDatePicker(!showDatePicker)} 
-                variant="outline" 
-                size="sm" 
+              <Button
+                onClick={() => setShowDatePicker(!showDatePicker)}
+                variant="outline"
+                size="sm"
                 className="text-xs md:text-sm"
               >
                 <Calendar className="h-4 w-4 mr-1" />
                 เลือกวัน
               </Button>
-              
+
               {/* Date Picker Popup */}
               {showDatePicker && (
                 <>
-                  <div 
-                    className="fixed inset-0 z-40" 
+                  <div
+                    className="fixed inset-0 z-40"
                     onClick={() => setShowDatePicker(false)}
                   />
                   <div className="absolute top-full left-0 mt-2 z-50 bg-card border rounded-lg shadow-lg p-4 w-72">
@@ -447,13 +447,13 @@ export default function CalendarPage() {
                         <ChevronRight className="h-4 w-4" />
                       </Button>
                     </div>
-                    
+
                     <div className="grid grid-cols-7 gap-1 text-center text-xs mb-2">
                       {["อา", "จ", "อ", "พ", "พฤ", "ศ", "ส"].map((day, i) => (
                         <div key={i} className="text-muted-foreground font-medium py-1">{day}</div>
                       ))}
                     </div>
-                    
+
                     <div className="grid grid-cols-7 gap-1">
                       {Array.from({ length: 42 }, (_, i) => {
                         const firstDay = new Date(currentDate.getFullYear(), currentDate.getMonth(), 1).getDay()
@@ -461,8 +461,8 @@ export default function CalendarPage() {
                         const day = i - firstDay + 1
                         const isCurrentMonth = day > 0 && day <= daysInMonth
                         const date = new Date(currentDate.getFullYear(), currentDate.getMonth(), day)
-                        const isToday = isCurrentMonth && 
-                          day === new Date().getDate() && 
+                        const isToday = isCurrentMonth &&
+                          day === new Date().getDate() &&
                           currentDate.getMonth() === new Date().getMonth() &&
                           currentDate.getFullYear() === new Date().getFullYear()
                         const isSelected = isCurrentMonth &&
@@ -485,7 +485,7 @@ export default function CalendarPage() {
                         )
                       })}
                     </div>
-                    
+
                     <div className="mt-3 pt-3 border-t">
                       <Button
                         variant="outline"
@@ -526,68 +526,78 @@ export default function CalendarPage() {
             </div>
           </div>
 
-        <div className="flex items-center gap-1 md:gap-2">
-          <Button variant="ghost" size="icon" className="hidden md:flex h-8 w-8 md:h-9 md:w-9">
-            <Search className="h-4 w-4 md:h-5 md:w-5" />
-          </Button>
-          <Button variant="ghost" size="icon" className="hidden md:flex h-8 w-8 md:h-9 md:w-9">
-            <Settings className="h-4 w-4 md:h-5 md:w-5" />
-          </Button>
-          <Select className="w-20 md:w-32 text-xs md:text-sm" value={view} onChange={(e) => setView(e.target.value as ViewType)}>
-            <option value="month">Month</option>
-            <option value="week">Week</option>
-            <option value="day">Day</option>
-          </Select>
-          {!isTechnician && (
-            <div className="flex items-center gap-2">
-              {["BOOKED", "DONE", "CANCELLED"].map((status) => (
-                <label key={status} className="flex items-center gap-1 text-xs bg-accent rounded px-2 py-1">
-                  <Checkbox
-                    checked={statusFilter.includes(status)}
-                    onCheckedChange={() => toggleStatusFilter(status)}
-                  />
-                  <span>{status}</span>
-                </label>
-              ))}
-            </div>
-          )}
+          <div className="flex items-center gap-1 md:gap-2">
+            <Button variant="ghost" size="icon" className="hidden md:flex h-8 w-8 md:h-9 md:w-9">
+              <Search className="h-4 w-4 md:h-5 md:w-5" />
+            </Button>
+            <Button variant="ghost" size="icon" className="hidden md:flex h-8 w-8 md:h-9 md:w-9">
+              <Settings className="h-4 w-4 md:h-5 md:w-5" />
+            </Button>
+            <Select className="w-20 md:w-32 text-xs md:text-sm" value={view} onChange={(e) => setView(e.target.value as ViewType)}>
+              <option value="month">Month</option>
+              <option value="week">Week</option>
+              <option value="day">Day</option>
+            </Select>
+            {!isTechnician && (
+              <div className="flex items-center gap-2">
+                {["BOOKED", "DONE", "CANCELLED"].map((status) => (
+                  <label key={status} className="flex items-center gap-1 text-xs bg-accent rounded px-2 py-1">
+                    <Checkbox
+                      checked={statusFilter.includes(status)}
+                      onCheckedChange={() => toggleStatusFilter(status)}
+                    />
+                    <span>{status}</span>
+                  </label>
+                ))}
+              </div>
+            )}
+          </div>
         </div>
-      </div>
 
-      {/* Calendar Grid */}
-      {view === "month" && (
-      <MonthCalendar
-        currentDate={currentDate}
-        appointments={filteredAppointments}
-        statusColors={statusColors}
-        onDateClick={handleDateClick}
-        onAppointmentClick={handleAppointmentClick}
-      />
-      )}
-      {view === "week" && (
-        <WeekCalendar
-          currentDate={currentDate}
-          appointments={filteredAppointments}
-          technicians={technicians.filter(t => techFilter.includes(t.id))}
-          statusColors={statusColors}
-          onDateClick={handleDateClick}
-          onAppointmentClick={handleAppointmentClick}
-        />
-      )}
-      {view === "day" && (
-        <DayCalendar
-          currentDate={currentDate}
-          appointments={filteredAppointments}
-          technicians={technicians}
-          onDateClick={handleDateClick}
-          onAppointmentClick={handleAppointmentClick}
-          onTechnicianClick={(tech) => {
-            setSelectedTechnician(tech)
-            setShowTechModal(true)
-          }}
-          isOwner={session?.user.role === "OWNER"}
-        />
-      )}
+        {/* Calendar Grid */}
+        {view === "month" && (
+          <MonthCalendar
+            currentDate={currentDate}
+            appointments={filteredAppointments}
+            statusColors={statusColors}
+            onDateClick={handleDateClick}
+            onAppointmentClick={handleAppointmentClick}
+          />
+        )}
+        {view === "week" && (
+          <WeekCalendar
+            currentDate={currentDate}
+            appointments={filteredAppointments}
+            technicians={technicians.filter(t => techFilter.includes(t.id))}
+            allTechnicians={technicians}
+            selectedTechIds={techFilter}
+            onTechFilterToggle={toggleTechFilter}
+            onSelectAllTechs={() => {
+              if (techFilter.length === technicians.length) {
+                setTechFilter([]) // Deselect all
+              } else {
+                setTechFilter(technicians.map(t => t.id)) // Select all
+              }
+            }}
+            statusColors={statusColors}
+            onDateClick={handleDateClick}
+            onAppointmentClick={handleAppointmentClick}
+          />
+        )}
+        {view === "day" && (
+          <DayCalendar
+            currentDate={currentDate}
+            appointments={filteredAppointments}
+            technicians={technicians}
+            onDateClick={handleDateClick}
+            onAppointmentClick={handleAppointmentClick}
+            onTechnicianClick={(tech) => {
+              setSelectedTechnician(tech)
+              setShowTechModal(true)
+            }}
+            isOwner={session?.user.role === "OWNER"}
+          />
+        )}
       </div>
 
       {showModal && (

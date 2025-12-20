@@ -7,6 +7,8 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Textarea } from "@/components/ui/textarea"
 import { Select } from "@/components/ui/select"
+import Swal from "sweetalert2"
+
 
 interface AppointmentModalProps {
   appointment: any
@@ -65,8 +67,8 @@ export default function AppointmentModal({
     } else {
       const dateStr = selectedDate.toISOString().split('T')[0]
       const firstTechId = technicians[0]?.id || ""
-      setFormData((prev) => ({ 
-        ...prev, 
+      setFormData((prev) => ({
+        ...prev,
         date: dateStr,
         customerPhone: "",
         technicianId: firstTechId
@@ -195,7 +197,7 @@ export default function AppointmentModal({
 
     // Parse date correctly to avoid timezone issues
     const [year, month, day] = formData.date.split("-").map(Number)
-    
+
     const startAt = new Date(year, month - 1, day, startHour, startMin, 0, 0)
     const endAt = new Date(year, month - 1, day, endHour, endMin, 0, 0)
 
@@ -227,6 +229,15 @@ export default function AppointmentModal({
     })
 
     if (res.ok) {
+      Swal.fire({
+        icon: "success",
+        title: appointment ? "บันทึกการแก้ไขแล้ว" : "เพิ่มนัดหมายแล้ว",
+        toast: true,
+        position: "top-end",
+        showConfirmButton: false,
+        timer: 2000,
+        timerProgressBar: true
+      })
       onSave()
     } else {
       const contentType = res.headers.get("content-type")
@@ -241,16 +252,57 @@ export default function AppointmentModal({
         }
       }
 
+      Swal.fire({
+        icon: "error",
+        title: errorMessage,
+        toast: true,
+        position: "top-end",
+        showConfirmButton: false,
+        timer: 3000,
+        timerProgressBar: true
+      })
       setError(errorMessage)
     }
   }
 
   const handleDelete = async () => {
-    if (!appointment || !confirm("ต้องการลบนัดหมายนี้?")) return
+    if (!appointment) return
+
+    const result = await Swal.fire({
+      title: "ต้องการลบนัดหมายนี้?",
+      text: "คุณจะไม่สามารถกู้คืนข้อมูลนี้ได้",
+      icon: "warning",
+      showCancelButton: true,
+      confirmButtonColor: "#ef4444",
+      cancelButtonColor: "#6b7280",
+      confirmButtonText: "ลบ",
+      cancelButtonText: "ยกเลิก"
+    })
+
+    if (!result.isConfirmed) return
 
     const res = await fetch(`/api/appointments/${appointment.id}`, { method: "DELETE" })
     if (res.ok) {
+      Swal.fire({
+        icon: "success",
+        title: "ลบนัดหมายแล้ว",
+        toast: true,
+        position: "top-end",
+        showConfirmButton: false,
+        timer: 2000,
+        timerProgressBar: true
+      })
       onSave()
+    } else {
+      Swal.fire({
+        icon: "error",
+        title: "ไม่สามารถลบนัดหมายได้",
+        toast: true,
+        position: "top-end",
+        showConfirmButton: false,
+        timer: 3000,
+        timerProgressBar: true
+      })
     }
   }
 
@@ -431,22 +483,52 @@ export default function AppointmentModal({
             />
           </div>
 
-          <DialogFooter className="pb-safe">
+          <DialogFooter className="sticky bottom-0 left-0 right-0 bg-[hsl(var(--card))] pt-4 pb-4 -mx-4 px-4 md:mx-0 md:px-0 md:static border-t md:border-t-0">
             {readOnly ? (
               <Button type="button" onClick={onClose} className="w-full">
                 ปิด
               </Button>
             ) : (
-              <div className="flex gap-2 w-full">
-                <Button type="submit" className="flex-1">
-                  บันทึก
-                </Button>
-                <Button type="button" variant="outline" onClick={onClose} className="flex-1">
-                  ยกเลิก
-                </Button>
+              <div className="flex flex-col gap-2 w-full">
+                <div className="flex gap-2 w-full">
+                  <Button type="submit" className="flex-1">
+                    บันทึก
+                  </Button>
+                  <Button
+                    type="button"
+                    variant="outline"
+                    onClick={async () => {
+                      const result = await Swal.fire({
+                        title: "ยกเลิกการแก้ไข?",
+                        text: "ข้อมูลที่กรอกจะไม่ถูกบันทึก",
+                        icon: "question",
+                        showCancelButton: true,
+                        confirmButtonColor: "#3b82f6",
+                        cancelButtonColor: "#6b7280",
+                        confirmButtonText: "ใช่, ยกเลิก",
+                        cancelButtonText: "กลับไปแก้ไข"
+                      })
+                      if (result.isConfirmed) {
+                        Swal.fire({
+                          icon: "info",
+                          title: "ยกเลิกแล้ว",
+                          toast: true,
+                          position: "top-end",
+                          showConfirmButton: false,
+                          timer: 1500,
+                          timerProgressBar: true
+                        })
+                        onClose()
+                      }
+                    }}
+                    className="flex-1"
+                  >
+                    ยกเลิก
+                  </Button>
+                </div>
                 {appointment && (
-                  <Button type="button" variant="destructive" onClick={handleDelete}>
-                    ลบ
+                  <Button type="button" variant="destructive" onClick={handleDelete} className="w-full">
+                    ลบนัดหมาย
                   </Button>
                 )}
               </div>

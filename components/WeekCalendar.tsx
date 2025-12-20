@@ -7,6 +7,10 @@ interface WeekCalendarProps {
   currentDate: Date
   appointments: any[]
   technicians: any[]
+  allTechnicians: any[] // All technicians for filter display
+  selectedTechIds: string[] // Currently selected technician IDs for filter
+  onTechFilterToggle: (techId: string) => void
+  onSelectAllTechs: () => void
   statusColors: Record<string, string>
   onDateClick: (date: Date) => void
   onAppointmentClick: (appointment: any) => void
@@ -16,13 +20,16 @@ export default function WeekCalendar({
   currentDate,
   appointments,
   technicians,
+  allTechnicians,
+  selectedTechIds,
+  onTechFilterToggle,
+  onSelectAllTechs,
   statusColors,
   onDateClick,
   onAppointmentClick
 }: WeekCalendarProps) {
   const SLOT_HEIGHT = 80 // px per hour block
-  const MIN_CARD_HEIGHT = 60
-  const COLUMN_MIN_WIDTH = 80
+  const MIN_CARD_HEIGHT = 40
 
   const scrollRef = useRef<HTMLDivElement>(null)
 
@@ -148,7 +155,7 @@ export default function WeekCalendar({
     <div className="flex-1 flex flex-col overflow-hidden bg-background">
       {/* Date headers */}
       <div className="border-b border-border sticky top-0 bg-background z-20">
-        <div className="grid" style={{ gridTemplateColumns: '40px repeat(7, 1fr)' }}>
+        <div className="grid w-full" style={{ gridTemplateColumns: '28px repeat(7, 1fr)' }}>
           <div className="border-r border-border bg-background" />
           {weekDays.map((day, index) => (
             <div
@@ -171,18 +178,80 @@ export default function WeekCalendar({
         </div>
       </div>
 
+      {/* Technician profiles header - left aligned with filter */}
+      <div className="border-b border-border bg-card/50 py-2 px-2 overflow-x-auto">
+        <div className="flex items-center gap-2 min-w-max">
+          {/* Select All Button */}
+          <button
+            onClick={onSelectAllTechs}
+            className={cn(
+              "flex items-center gap-1 px-2 py-1 rounded-full text-[10px] md:text-xs font-semibold transition-all flex-shrink-0 border",
+              selectedTechIds.length === allTechnicians.length
+                ? "bg-primary text-primary-foreground border-primary"
+                : "bg-muted text-muted-foreground border-border hover:bg-accent"
+            )}
+          >
+            <svg className="w-3 h-3 md:w-4 md:h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
+            </svg>
+            <span className="hidden sm:inline">ทั้งหมด</span>
+          </button>
+
+          {/* Technician Pills */}
+          {allTechnicians.filter(t => t.active !== false).map((tech) => {
+            const isSelected = selectedTechIds.includes(tech.id)
+            return (
+              <button
+                key={tech.id}
+                onClick={() => onTechFilterToggle(tech.id)}
+                className={cn(
+                  "flex items-center gap-1.5 px-2 py-1 rounded-full transition-all flex-shrink-0 border",
+                  isSelected
+                    ? "opacity-100 shadow-sm"
+                    : "opacity-40 hover:opacity-70"
+                )}
+                style={{
+                  backgroundColor: isSelected ? (tech.color || "#3b82f6") + "20" : "transparent",
+                  borderColor: tech.color || "#3b82f6"
+                }}
+              >
+                <div
+                  className="w-5 h-5 md:w-6 md:h-6 rounded-full flex items-center justify-center text-[9px] md:text-[10px] font-bold overflow-hidden border flex-shrink-0"
+                  style={{
+                    borderColor: tech.color || "#3b82f6",
+                    backgroundColor: (tech.color || "#3b82f6") + "30"
+                  }}
+                >
+                  {tech.image ? (
+                    <img src={tech.image} alt={tech.name} className="w-full h-full object-cover" />
+                  ) : (
+                    <span style={{ color: tech.color || "#3b82f6" }}>{tech.name.charAt(0)}</span>
+                  )}
+                </div>
+                <span
+                  className="text-[10px] md:text-xs font-semibold"
+                  style={{ color: tech.color || "#3b82f6" }}
+                >
+                  {tech.name}
+                </span>
+              </button>
+            )
+          })}
+        </div>
+      </div>
+
       {/* Time grid */}
-      <div ref={scrollRef} className="flex-1 overflow-auto">
-        <div className="grid" style={{ gridTemplateColumns: '40px repeat(7, 1fr)' }}>
+      <div ref={scrollRef} className="flex-1 overflow-y-auto overflow-x-hidden">
+        <div className="grid w-full" style={{ gridTemplateColumns: '28px repeat(7, 1fr)' }}>
           {/* Time labels */}
           <div className="border-r border-border sticky left-0 bg-background z-10">
             {hours.map((hour) => (
               <div
                 key={hour}
-                className="border-b border-border px-0.5 py-1 text-[9px] md:text-xs text-muted-foreground text-center"
+                className="border-b border-border py-1 text-[8px] md:text-[10px] text-muted-foreground text-center flex items-start justify-center"
                 style={{ height: SLOT_HEIGHT }}
               >
-                {`${hour.toString().padStart(2, "0")}:00`}
+                {hour}
               </div>
             ))}
           </div>

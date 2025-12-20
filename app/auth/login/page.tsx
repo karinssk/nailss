@@ -23,7 +23,7 @@ export default function LoginPage() {
     if (result?.error) {
       setError("อีเมลหรือรหัสผ่านไม่ถูกต้อง")
     } else {
-      router.push("https://nailscheerful.com/calendar")
+      router.push(`${process.env.NEXT_PUBLIC_APP_URL || ""}/calendar`)
 
     }
   }
@@ -135,7 +135,7 @@ export default function LoginPage() {
 
             <button
               type="button"
-              onClick={() => signIn("google", { callbackUrl: "https://nailscheerful.com/calendar" })}
+              onClick={() => signIn("google", { callbackUrl: `${process.env.NEXT_PUBLIC_APP_URL || ""}/calendar` })}
               className="mt-4 w-full py-3 px-4 border border-gray-200 rounded-xl bg-white hover:bg-gray-50 text-gray-700 flex items-center justify-center gap-3 transition-all duration-200 shadow-sm hover:shadow-md font-medium"
             >
               <svg className="w-5 h-5" viewBox="0 0 24 24">
