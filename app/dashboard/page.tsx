@@ -32,9 +32,8 @@ export default function DashboardPage() {
 
   useEffect(() => {
     if (startDate && endDate) {
-      if (view === "SUMMARY") {
-        fetchSummary()
-      } else {
+      fetchSummary()
+      if (view === "DETAILS") {
         fetchAppointments()
       }
     }
@@ -129,6 +128,7 @@ export default function DashboardPage() {
     }),
     { count: 0, revenue: 0, commission: 0, net: 0 }
   )
+  const techniciansWithoutAppointments = summary.filter((s) => s.count === 0)
 
   const paginatedAppointments = appointments.slice((page - 1) * pageSize, page * pageSize)
   const totalPages = Math.max(1, Math.ceil(appointments.length / pageSize))
@@ -352,6 +352,14 @@ export default function DashboardPage() {
               <div className="text-sm text-muted-foreground">
                 แสดงรายการนัดหมายตามช่วงวันที่ที่เลือก
               </div>
+              {techniciansWithoutAppointments.length > 0 && (
+                <div className="bg-muted/50 rounded-lg p-3 text-sm">
+                  <div className="font-semibold mb-1">ช่างที่ไม่มีรายการในช่วงนี้</div>
+                  <div className="text-muted-foreground">
+                    {techniciansWithoutAppointments.map((s) => s.technicianName).join(", ")}
+                  </div>
+                </div>
+              )}
               <div className="hidden md:block overflow-x-auto">
                 <table className="w-full">
                   <thead className="bg-muted">

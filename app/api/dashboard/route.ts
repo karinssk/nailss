@@ -53,10 +53,43 @@ export async function GET(req: NextRequest) {
     include: { technician: true, branch: true }
   })
 
-  const summary = appointments.reduce((acc: any, apt) => {
+  const technicianWhere: any = {}
+
+  if (branchId) technicianWhere.branchId = branchId
+  if (technicianId) technicianWhere.id = technicianId
+
+  if (isTechnician) {
+    if (session.user.technicianId) {
+      technicianWhere.id = session.user.technicianId
+    }
+    if (session.user.branchId) {
+      technicianWhere.branchId = session.user.branchId
+    }
+  }
+
+  const technicians = await prisma.technician.findMany({
+    where: Object.keys(technicianWhere).length > 0 ? technicianWhere : undefined,
+    select: { id: true, name: true }
+  })
+
+  const summary: Record<string, any> = {}
+
+  technicians.forEach((tech) => {
+    summary[tech.id] = {
+      technicianId: tech.id,
+      technicianName: tech.name,
+      count: 0,
+      totalRevenue: 0,
+      totalCommission: 0,
+      netRevenue: 0
+    }
+  })
+
+  appointments.forEach((apt) => {
     const techId = apt.technicianId
-    if (!acc[techId]) {
-      acc[techId] = {
+    if (!summary[techId]) {
+      summary[techId] = {
+        technicianId: techId,
         technicianName: apt.technician.name,
         count: 0,
         totalRevenue: 0,
@@ -64,12 +97,15 @@ export async function GET(req: NextRequest) {
         netRevenue: 0
       }
     }
-    acc[techId].count++
-    acc[techId].totalRevenue += apt.price
-    acc[techId].totalCommission += apt.commissionAmount
-    acc[techId].netRevenue += apt.price - apt.commissionAmount
-    return acc
-  }, {})
+    summary[techId].count++
+    summary[techId].totalRevenue += apt.price
+    summary[techId].totalCommission += apt.commissionAmount
+    summary[techId].netRevenue += apt.price - apt.commissionAmount
+  })
 
-  return NextResponse.json(Object.values(summary))
+  const summaryList = Object.values(summary).sort((a, b) =>
+    String(a.technicianName).localeCompare(String(b.technicianName))
+  )
+
+  return NextResponse.json(summaryList)
 }
