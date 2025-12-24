@@ -22,11 +22,27 @@ export default function DashboardPage() {
   const [page, setPage] = useState(1)
   const pageSize = 20
 
+  const toDateInputValue = (date: Date) => {
+    const year = date.getFullYear()
+    const month = String(date.getMonth() + 1).padStart(2, "0")
+    const day = String(date.getDate()).padStart(2, "0")
+    return `${year}-${month}-${day}`
+  }
+
+  const getDateRangeParams = () => {
+    const start = new Date(`${startDate}T00:00:00`)
+    const end = new Date(`${endDate}T23:59:59.999`)
+    return {
+      startDate: start.toISOString(),
+      endDate: end.toISOString()
+    }
+  }
+
   useEffect(() => {
     const today = new Date()
     const firstDay = new Date(today.getFullYear(), today.getMonth(), 1)
-    setStartDate(firstDay.toISOString().split("T")[0])
-    setEndDate(today.toISOString().split("T")[0])
+    setStartDate(toDateInputValue(firstDay))
+    setEndDate(toDateInputValue(today))
     fetchBranches()
   }, [])
 
@@ -47,9 +63,10 @@ export default function DashboardPage() {
   }
 
   const fetchSummary = async () => {
+    const range = getDateRangeParams()
     const params = new URLSearchParams({
-      startDate,
-      endDate,
+      startDate: range.startDate,
+      endDate: range.endDate,
       ...(selectedBranch && { branchId: selectedBranch }),
       ...(statusFilter !== "ALL" && { status: statusFilter })
     })
@@ -60,9 +77,10 @@ export default function DashboardPage() {
 
   const fetchAppointments = async () => {
     setLoading(true)
+    const range = getDateRangeParams()
     const params = new URLSearchParams({
-      startDate,
-      endDate,
+      startDate: range.startDate,
+      endDate: range.endDate,
       ...(selectedBranch && { branchId: selectedBranch }),
       ...(statusFilter !== "ALL" && { status: statusFilter })
     })
@@ -276,20 +294,20 @@ export default function DashboardPage() {
             <>
               {/* Summary Cards */}
               <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 md:gap-4 mb-4 md:mb-6">
-                <div className="bg-blue-50 dark:bg-blue-950/30 p-3 md:p-4 rounded-lg">
-                  <div className="text-xs md:text-sm text-muted-foreground mb-1">จำนวนงานทั้งหมด</div>
+                <div className="bg-blue-50 dark:bg-blue-950/30 p-3 md:p-4 rounded-lg text-slate-900 dark:text-slate-100">
+                  <div className="text-xs md:text-sm text-slate-600 dark:text-slate-300 mb-1">จำนวนงานทั้งหมด</div>
                   <div className="text-xl md:text-2xl font-bold">{totals.count}</div>
                 </div>
-                <div className="bg-green-50 dark:bg-green-950/30 p-3 md:p-4 rounded-lg">
-                  <div className="text-xs md:text-sm text-muted-foreground mb-1">รายได้รวม</div>
+                <div className="bg-green-50 dark:bg-green-950/30 p-3 md:p-4 rounded-lg text-slate-900 dark:text-slate-100">
+                  <div className="text-xs md:text-sm text-slate-600 dark:text-slate-300 mb-1">รายได้รวม</div>
                   <div className="text-xl md:text-2xl font-bold">฿{totals.revenue.toFixed(2)}</div>
                 </div>
-                <div className="bg-yellow-50 dark:bg-yellow-950/30 p-3 md:p-4 rounded-lg">
-                  <div className="text-xs md:text-sm text-muted-foreground mb-1">คอมมิชชั่นรวม</div>
+                <div className="bg-yellow-50 dark:bg-yellow-950/30 p-3 md:p-4 rounded-lg text-slate-900 dark:text-slate-100">
+                  <div className="text-xs md:text-sm text-slate-600 dark:text-slate-300 mb-1">คอมมิชชั่นรวม</div>
                   <div className="text-xl md:text-2xl font-bold">฿{totals.commission.toFixed(2)}</div>
                 </div>
-                <div className="bg-purple-50 dark:bg-purple-950/30 p-3 md:p-4 rounded-lg">
-                  <div className="text-xs md:text-sm text-muted-foreground mb-1">รายได้สุทธิ</div>
+                <div className="bg-purple-50 dark:bg-purple-950/30 p-3 md:p-4 rounded-lg text-slate-900 dark:text-slate-100">
+                  <div className="text-xs md:text-sm text-slate-600 dark:text-slate-300 mb-1">รายได้สุทธิ</div>
                   <div className="text-xl md:text-2xl font-bold">฿{totals.net.toFixed(2)}</div>
                 </div>
               </div>

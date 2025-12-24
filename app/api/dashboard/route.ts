@@ -20,12 +20,15 @@ export async function GET(req: NextRequest) {
     ? statusParam.split(",").map((s) => s.trim().toUpperCase()).filter((s) => allowedStatuses.includes(s as any))
     : allowedStatuses
 
-  // Parse dates and set endDate to end of day to include all appointments on that date
+  const hasTime = (value: string | null) => Boolean(value && value.includes("T"))
+  // Parse dates and set endDate to end of day only for date-only inputs
   const startDateObj = startDate ? new Date(startDate) : undefined
   let endDateObj: Date | undefined = undefined
   if (endDate) {
     endDateObj = new Date(endDate)
-    endDateObj.setHours(23, 59, 59, 999) // End of day
+    if (!hasTime(endDate)) {
+      endDateObj.setHours(23, 59, 59, 999) // End of day
+    }
   }
 
   const where: any = {
